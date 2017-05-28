@@ -106,4 +106,26 @@ public class HttpRequestUtils {
             return "Pair [key=" + key + ", value=" + value + "]";
         }
     }
+
+    public static String getUrl(String httpRequest){
+        String url = httpRequest.split(" ")[1];
+        String requestPath = "";
+        int index = url.indexOf("?");
+
+        if(index != -1){
+            requestPath = url.substring(0, index);
+        } else {
+            requestPath = url;
+        }
+
+        return requestPath;
+    }
+
+    public static String getParamString(String httpRequest) {
+        String url = httpRequest.split(" ")[1];
+        int index = url.indexOf("?");
+        String paramString = url.substring(index+1);
+
+        return paramString;
+    }
 }
