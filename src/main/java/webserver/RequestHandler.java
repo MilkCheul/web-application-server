@@ -86,39 +86,20 @@ public class RequestHandler extends Thread {
 					DataOutputStream dos = new DataOutputStream(out);
 					response302LoginSuccessHeader(dos);
 				} else {
-					DataOutputStream dos = new DataOutputStream(out);
-					url = "/user/login_failed.html";
-
-					byte[] body = Files.readAllBytes(new File("./webapp" + url).toPath());
-
-					response200Header(dos, body.length);
-					responseBody(dos, body);
+					responseResource(out, "/user/login_failed.html");
 				}
 
 			} else if ("/user/list.html".equals(url)) {
 				if ("false".equals(cookieMap.get("logined"))) {
-					url = "/user/login.html";
-
-					DataOutputStream dos = new DataOutputStream(out);
-					response302Header(dos, url);
+					responseResource(out, "/user/login.html");
 
 					return;
 				}
 
 				Collection<User> users = DataBase.findAll();
-				StringBuilder sb = new StringBuilder();
-				sb.append("<table border='1'>");
 
-				for (User user : users) {
-					sb.append("<tr>");
-					sb.append("<td>" + user.getUserId() + "</td>");
-					sb.append("<td>" + user.getName() + "</td>");
-					sb.append("<td>" + user.getEmail() + "</td>");
-					sb.append("<tr>");
-				}
+				byte[] body = getUserListByHtml(users).toString().getBytes();
 
-				sb.append("</table>");
-				byte[] body = sb.toString().getBytes();
 				DataOutputStream dos = new DataOutputStream(out);
 				response200Header(dos, body.length);
 				responseBody(dos, body);
@@ -139,6 +120,22 @@ public class RequestHandler extends Thread {
 		} catch (Exception e) {
 			log.error(e.getMessage());
 		}
+	}
+
+	private StringBuilder getUserListByHtml(Collection<User> users) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("<table border='1'>");
+
+		for (User user : users) {
+			sb.append("<tr>");
+			sb.append("<td>" + user.getUserId() + "</td>");
+			sb.append("<td>" + user.getName() + "</td>");
+			sb.append("<td>" + user.getEmail() + "</td>");
+			sb.append("<tr>");
+		}
+
+		sb.append("</table>");
+		return sb;
 	}
 
 	private Object getModel(Map<String, String> param, Class clazz) throws Exception {
@@ -216,5 +213,12 @@ public class RequestHandler extends Thread {
 		} catch (IOException e) {
 			log.error(e.getMessage());
 		}
+	}
+
+	private void responseResource(OutputStream out, String url) throws IOException{
+		DataOutputStream dos = new DataOutputStream(out);
+		byte[] body = Files.readAllBytes(new File("./webapp" + url).toPath());
+		response200Header(dos, body.length);
+		responseBody(dos, body);
 	}
 }
